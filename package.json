@@ -1,9 +1,13 @@
 {
   "name": "Rotateur",
   "main": "API/index.html",
+  "description": "Application en node Webkit pour retourner des images sans outil graphique",
+  "version": "0.1.0",
   "window": {
+    "toolbar": true,
     "height": 1000,
     "width:": 1000,
-    "frame": true
+    "frame": true,
+    "icon": "./API/icons/logo.jpg"
   }
 }
