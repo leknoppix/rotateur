@@ -1,5 +1,3 @@
-/** Initialisation de la rotation */
-var autoRotate = require('exif-image-auto-rotation');
 /***********************************
  **
  **        Gestion du Drag and Drop
@@ -25,7 +23,7 @@ el.ondrop = function(e){
     this.innerHTML= "Traitement en cours";
     for (var i=0; i< e.dataTransfer.files.length; ++i){
         var file= e.dataTransfer.files[i].path;
-        document.getElementById("carousel-inner").innerHTML = document.getElementById("carousel-inner").innerHTML + file;
-        // document.getElementsByClassName("carousel-inner").innerHTML = "<div class=\"item\"><div class=\"carousel-page\"><img src=\""+ file+ "\" class=\"img-responsive\" style=\"margin:0px auto;\" /></div></div>";
+        var el = document.getElementById('carousel-inner');
+        el.innerHTML += '<img src="' + file +'" /><br />';
     }
 };

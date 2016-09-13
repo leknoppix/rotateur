@@ -1,0 +1,10 @@
+.idea
+API
+locales
+credits.html
+node_modules
+*.dll
+*.dat
+*.bin
+*.pak
+*.exe
