@@ -1,0 +1,12 @@
+{
+  "name": "Rotator",
+  "main": "API/index.html",
+  "window": {
+    "height": 1000,
+    "width:": 1000,
+    "frame": true
+  },
+  "dependencies": {
+    "exif-image-auto-rotation": "^1.0.3"
+  }
+}
