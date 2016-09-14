@@ -1,7 +1,6 @@
 .idea
-API
 locales
-pnacl
+pnacl/*
 credits.html
 node_modules
 API/icons/logo.jpg
