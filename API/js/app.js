@@ -30,16 +30,16 @@ el.ondrop = function(e){
         var directory = path.dirname(file) + path.sep;
         var oldname = path.basename(file);
         //Conversion de l'image en binary
+        var jpeg = fs.readFileSync(file.rotate(90));
+        var data = jpeg.toString("binary");
         try {
-            var jpeg = fs.readFileSync(file.rotate(90));
-            var data = jpeg.toString("binary");
             piexifjs.remove(data);
-            var newJpeg = new Buffer(data, "binary");
-            fs.writeFileSync(file, newJpeg);
         }
         catch(err) {
-            console.log(oldname + 'Image ne présentant pas de EXIF');
+            console.log(oldname + ' Image ne présentant pas de EXIF');
         }
+        var newJpeg = new Buffer(data, "binary");
+        fs.writeFileSync(file, newJpeg);
         html = '<div class="row slide">\
                     <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">\
                         <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12 thumbnail">\
