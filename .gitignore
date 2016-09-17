@@ -5,6 +5,7 @@ pnacl/*
 credits.html
 node_modules
 API/icons/logo.jpg
+API/icons/logo.png
 *.dll
 *.dat
 *.bin
