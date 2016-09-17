@@ -28,3 +28,7 @@ section{
     color: #8dd0ff;
     border-color: #8dd0ff;
 }
+.hidden
+{
+    display: none;
+}
