@@ -10,6 +10,9 @@
     "frame": true,
     "icon": "icons/logo.png"
   },
+  "webkit": {
+    "plugin": true
+  },
   "dependencies": {
     "fs": "0.0.1-security",
     "image-preloader": "^1.1.1",
