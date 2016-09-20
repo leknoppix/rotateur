@@ -2,7 +2,6 @@ var fs = require('fs');
 var path = require('path');
 var Jimp = require("jimp");
 var piexifjs = require('piexifjs');
-var mkdirp = require('mkdirp');
 const os = require('os');
 /***********************************
  **
