@@ -3,7 +3,6 @@ var path = require('path');
 var Jimp = require("jimp");
 var piexifjs = require('piexifjs');
 var mkdirp = require('mkdirp');
-var imagepreloader = require('image-preloader');
 const os = require('os');
 /***********************************
  **
@@ -32,6 +31,7 @@ el.ondrop = function(e){
         var file= e.dataTransfer.files[i].path;
         var directory_picture = path.dirname(file) + path.sep;
         var oldname = path.basename(file);
+        localStorage.setItem(oldname,0);
         var directorytemp = os.tmpdir() + path.sep;
         var newfile = directorytemp + new Date().getTime() + '_' + oldname;
         //Conversion de l'image en binary
@@ -58,7 +58,7 @@ el.ondrop = function(e){
                                 <button type="button" class="btn btn-default protor180">\
                                     <span class="fa fa-1x fa-repeat" aria-hidden="true">&nbsp;180°</span>\
                                 </button>&nbsp;&nbsp;\
-                                <button type="button" class="btn btn-default psave">\
+                                <button type="button" class="btn btn-default psave" disabled>\
                                     <span class="fa fa-1x fa-floppy-o" aria-hidden="true">&nbsp;Enregistrer</span>\
                                 </button>&nbsp;&nbsp;\
                                 <button type="button" class="btn btn-default pclose">\
@@ -81,52 +81,93 @@ el.ondrop = function(e){
 //gère la fermeture de la photo choisi
 $("body").on("click", ".pclose", function(){
     var file = $(this).parent().parent().find("img").attr('src');
+    result = getname(file);
+    localStorage.removeItem(result[5]);
     fs.unlink(file);
     $(this).parent().parent().remove();
 });
 // rotation de l"image dans le sens inverse de l'aiguille d'une montre 90°
 $("body").on("click", ".protor90", function(){
     var div = $(this).parent().parent().find("img");
-    rotation(270, div);
+    var button= $(this).parent();
+    rotation(270, div, button);
 });
 // rotation de l"image dans le sens des aiguilles d'une montre 90°
 $("body").on("click", ".protorm90", function(){
     var div = $(this).parent().parent().find("img");
-    rotation(90, div);
+    var button= $(this).parent();
+    rotation(90, div, button);
 });
 // rotation de l"image dans le sens des aiguilles d'une montre 180°
 $("body").on("click", ".protor180", function(){
     var div = $(this).parent().parent().find("img");
-    rotation(180, div);
+    var button= $(this).parent();
+    rotation(180, div, button);
 });
 // Enregistrement de l'image
 $("body").on("click", ".psave", function(){
     var image = $(this).parent().parent().find("img").attr('src');
-    var destination = $(this).parent().parent().find("span.hidden").text() + path.sep;
-    regex = /([0-9a-zA-Z\-~:_\ \\]*)([\\])([0-9]*)([_])([0-9a-zA-Z\-_.]*)/ig;
-    var result = regex.exec(image);
+    var button = $(this).parent();
+    OffButton(button);
+    var destination = $(this).parent().parent().find("span.hidden").text();
+    result = getname(image);
     nomfichier=result[5];
-    fs.rename(image, destination + nomfichier);
+    console.log('Fichier source '+ image);
+    console.log('Fichier à générer ' + destination + nomfichier);
+    fs.createReadStream(image).pipe(fs.createWriteStream(destination + nomfichier));
+    button.find('.pclose').prop('disabled', false);
 });
 //fonction qui permet la rotation de l'image
-function rotation(angle, div)
+function rotation(angle, div, button)
 {
+    if(angle == 90){ var sens = 1}else if(angle == 180){ var sens = 2}else if (angle==270){ var sens = -1}
     var that = div;
     fichier = that.attr('src');
-    regex = /([0-9a-zA-Z\-~:_\ \\]*)([\\])([0-9]*)([_])([0-9a-zA-Z\-_.]*)/ig;
-    var result = regex.exec(fichier);
+    result = getname(fichier);
     dategenerer = new Date().getTime();
     nomfichier=result[5];
     base=result[1] + path.sep;
     nouveaufichiercreer = base + dategenerer + '_' + nomfichier;
+    OffButton(button);
+    updateLs(result[5], sens, button);
     Jimp.read(fichier).then(function (file) {
         file
-            .rotate(angle)                 // set rotation
+            .rotate(angle)
+            // set rotation
             .write(nouveaufichiercreer, function(){ //save
                 fs.unlink(fichier);
                 that.attr('src', nouveaufichiercreer);
+                //reactiver les boutons
+                OnButton(button);
+                updateLs(result[5], 0, button);
             });
     }).catch(function (err) {
         console.error(err);
+    });
+}
+//fonction getname
+function getname(fichier){
+    regex = /([0-9a-zA-Z\-~:_\ \\]*)([\\])([0-9]*)([_])([0-9a-zA-Z\-_.]*)/ig;
+    var result = regex.exec(fichier);
+    return result;
+}
+//fonction update localStorage
+function updateLs(namefile, sens, button){
+    newvalue = parseFloat(localStorage.getItem(namefile)) + parseFloat(sens);
+    if(newvalue == 4 || newvalue == -4 || newvalue == 0){
+        newvalue = 0;
+        button.find('.psave').prop('disabled', true);
+    }
+    localStorage.setItem(namefile, newvalue);
+}
+//fonction pour afficher tout les boutons
+function OnButton(button){
+    button.find('button').each(function(){
+        $(this).prop('disabled', false);
+    });
+}
+function OffButton(button){
+    button.find('button').each(function(){
+        $(this).prop('disabled', true);
     });
 }
