@@ -5,8 +5,10 @@ locales
 pnacl/*
 credits.html
 node_modules
-API/icons/logo.jpg
-API/icons/logo.png
+icons/logo.jpg
+icons/logo.png
+icns/logo.icns
+debug.log
 *.dll
 *.dat
 *.bin

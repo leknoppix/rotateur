@@ -44,7 +44,7 @@ el.ondrop = function(e){
         }
         var newJpeg = new Buffer(data, "binary");
         fs.writeFileSync(newfile, newJpeg);
-        if(os.platform() == 'linux'){
+        if(os.platform() == 'linux' || os.platform() == 'darwin'){
             newfile= 'file://' + newfile;
             directory_picture = 'file://' + directory_picture;
         }
@@ -86,6 +86,9 @@ $("body").on("click", ".pclose", function(){
     var file = $(this).parent().parent().find("img").attr('src');
     result = getname(file);
     localStorage.removeItem(result[5]);
+    if(os.platform() == 'linux' || os.platform() == 'darwin'){
+        file = file.replace('file://', '');
+    }
     fs.unlink(file);
     $(this).parent().parent().remove();
 });
@@ -116,7 +119,7 @@ $("body").on("click", ".psave", function(){
     result = getname(image);
     nomfichier= result[3];
     nomgenerer=destination + nomfichier;
-    if(os.platform() == 'linux'){
+    if(os.platform() == 'linux' || os.platform() == 'darwin'){
         image = image.replace('file://', '');
         nomgenerer = nomgenerer.replace('file://', '');
     }
@@ -134,7 +137,7 @@ function rotation(angle, div, button)
     nomfichier = result[3];
     base = os.tmpdir() + path.sep;
     nouveaufichiercreer = base + dategenerer + '_' + nomfichier;
-    if(os.platform() == 'linux'){
+    if(os.platform() == 'linux' || os.platform() == 'darwin'){
         fichier = fichier.replace('file://','');
     }
     OffButton(button);
@@ -145,7 +148,7 @@ function rotation(angle, div, button)
             // set rotation
             .write(nouveaufichiercreer, function(){ //save
                 fs.unlink(fichier);
-                if(os.platform() == 'linux'){
+                if(os.platform() == 'linux' || os.platform() == 'darwin'){
                     nouveaufichiercreer = 'file://' + nouveaufichiercreer;
                 }
                 that.attr('src', nouveaufichiercreer);
