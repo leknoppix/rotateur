@@ -44,6 +44,10 @@ el.ondrop = function(e){
         }
         var newJpeg = new Buffer(data, "binary");
         fs.writeFileSync(newfile, newJpeg);
+        if(os.platform() == 'linux'){
+            newfile= 'file://' + newfile;
+            directory_picture = 'file://' + directory_picture;
+        }
         html = '<div class="row slide">\
                     <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">\
                         <div class="col-lg-6 col-xs-12 col-sm-12 col-md-6 thumbnail">\
@@ -110,10 +114,13 @@ $("body").on("click", ".psave", function(){
     OffButton(button);
     var destination = $(this).parent().parent().find("span.hidden").text();
     result = getname(image);
-    nomfichier=result[5];
-    console.log('Fichier source '+ image);
-    console.log('Fichier à générer ' + destination + nomfichier);
-    fs.createReadStream(image).pipe(fs.createWriteStream(destination + nomfichier));
+    nomfichier= result[3];
+    nomgenerer=destination + nomfichier;
+    if(os.platform() == 'linux'){
+        image = image.replace('file://', '');
+        nomgenerer = nomgenerer.replace('file://', '');
+    }
+    fs.createReadStream(image).pipe(fs.createWriteStream(nomgenerer));
     button.find('.pclose').prop('disabled', false);
 });
 //fonction qui permet la rotation de l'image
@@ -124,21 +131,27 @@ function rotation(angle, div, button)
     fichier = that.attr('src');
     result = getname(fichier);
     dategenerer = new Date().getTime();
-    nomfichier=result[5];
-    base=result[1] + path.sep;
+    nomfichier = result[3];
+    base = os.tmpdir() + path.sep;
     nouveaufichiercreer = base + dategenerer + '_' + nomfichier;
+    if(os.platform() == 'linux'){
+        fichier = fichier.replace('file://','');
+    }
     OffButton(button);
-    updateLs(result[5], sens, button);
+    updateLs(nomfichier, sens, button);
     Jimp.read(fichier).then(function (file) {
         file
             .rotate(angle)
             // set rotation
             .write(nouveaufichiercreer, function(){ //save
                 fs.unlink(fichier);
+                if(os.platform() == 'linux'){
+                    nouveaufichiercreer = 'file://' + nouveaufichiercreer;
+                }
                 that.attr('src', nouveaufichiercreer);
                 //reactiver les boutons
                 OnButton(button);
-                updateLs(result[5], 0, button);
+                updateLs(nomfichier, 0, button);
             });
     }).catch(function (err) {
         console.error(err);
@@ -146,7 +159,7 @@ function rotation(angle, div, button)
 }
 //fonction getname
 function getname(fichier){
-    regex = /([0-9a-zA-Z\-~:_\ \\]*)([\\])([0-9]*)([_])([0-9a-zA-Z\-_.]*)/ig;
+    regex = /([0-9]*)(_)([a-zA-Z0-9.]*)/ig;
     var result = regex.exec(fichier);
     return result;
 }
