@@ -132,9 +132,8 @@ function rotation(angle, div, button)
     if(angle == 90){ var sens = 1}else if(angle == 180){ var sens = 2}else if (angle==270){ var sens = -1}
     var that = div;
     fichier = that.attr('src');
-    result = getname(fichier);
     dategenerer = new Date().getTime();
-    nomfichier = result[3];
+    nomfichier = getname(fichier);
     base = os.tmpdir() + path.sep;
     nouveaufichiercreer = base + dategenerer + '_' + nomfichier;
     if(os.platform() == 'linux' || os.platform() == 'darwin'){
@@ -162,8 +161,8 @@ function rotation(angle, div, button)
 }
 //fonction getname
 function getname(fichier){
-    regex = /([0-9]*)(_)([a-zA-Z0-9.]*)/ig;
-    var result = regex.exec(fichier);
+    tableau = fichier.split(path.sep);
+    result = tableau[tableau.length-1];
     return result;
 }
 //fonction update localStorage
