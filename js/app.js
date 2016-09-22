@@ -85,7 +85,7 @@ el.ondrop = function(e){
 $("body").on("click", ".pclose", function(){
     var file = $(this).parent().parent().find("img").attr('src');
     result = getname(file);
-    localStorage.removeItem(result[5]);
+    localStorage.removeItem(result);
     if(os.platform() == 'linux' || os.platform() == 'darwin'){
         file = file.replace('file://', '');
     }
@@ -117,7 +117,7 @@ $("body").on("click", ".psave", function(){
     OffButton(button);
     var destination = $(this).parent().parent().find("span.hidden").text();
     result = getname(image);
-    nomfichier= result[3];
+    nomfichier= result;
     nomgenerer=destination + nomfichier;
     if(os.platform() == 'linux' || os.platform() == 'darwin'){
         image = image.replace('file://', '');
@@ -163,7 +163,11 @@ function rotation(angle, div, button)
 function getname(fichier){
     tableau = fichier.split(path.sep);
     result = tableau[tableau.length-1];
-    return result;
+    name = result;
+    regex = /([0-9]{13}_)(.*)/gmi;
+    result = regex.exec(name);
+    console.log(result[result.length-1]);
+    return result[result.length-1];
 }
 //fonction update localStorage
 function updateLs(namefile, sens, button){
