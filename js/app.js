@@ -36,13 +36,14 @@ el.ondrop = function(e){
         //Conversion de l'image en binary
         var jpeg = fs.readFileSync(file);
         var data = jpeg.toString("binary");
+        var newdata = data;
         try {
-            piexifjs.remove(data);
+            newdata = piexifjs.remove(data);
         }
         catch(err) {
             console.log(oldname + ' Image ne présentant pas de EXIF');
         }
-        var newJpeg = new Buffer(data, "binary");
+        var newJpeg = new Buffer(newdata, "binary");
         fs.writeFileSync(newfile, newJpeg);
         if(os.platform() == 'linux' || os.platform() == 'darwin'){
             newfile= 'file://' + newfile;
