@@ -31,6 +31,7 @@ el.ondrop = function(e){
         var directory_picture = path.dirname(file) + path.sep;
         var oldname = path.basename(file);
         localStorage.setItem(oldname,0);
+        localStorage.setItem('mirror_' + oldname,0);
         var directorytemp = os.tmpdir() + path.sep;
         var newfile = directorytemp + new Date().getTime() + '_' + oldname;
         //Conversion de l'image en binary
@@ -54,19 +55,22 @@ el.ondrop = function(e){
                         <div class="col-lg-6 col-xs-12 col-sm-12 col-md-6 thumbnail">\
                             <div class="action" style="text-align: center;height: 80px;"><br />\
                                 <button type="button" class="btn btn-default protor90">\
-                                    <span class="fa fa-1x fa-undo" aria-hidden="true">&nbsp;90°</span>\
-                                </button>&nbsp;&nbsp;\
+                                    <span class="fa fa-1x fa-undo" aria-hidden="true">90°</span>\
+                                </button>\
                                 <button type="button" class="btn btn-default protorm90">\
-                                    <span class="fa fa-1x fa-repeat" aria-hidden="true">&nbsp;90°</span>\
-                                </button>&nbsp;&nbsp;\
+                                    <span class="fa fa-1x fa-repeat" aria-hidden="true">90°</span>\
+                                </button>\
                                 <button type="button" class="btn btn-default protor180">\
-                                    <span class="fa fa-1x fa-repeat" aria-hidden="true">&nbsp;180°</span>\
-                                </button>&nbsp;&nbsp;\
+                                    <span class="fa fa-1x fa-repeat" aria-hidden="true">180°</span>\
+                                </button>\
+                                <button type="button" class="btn btn-default mirror">\
+                                    <span class="fa fa-1x fa-columns" aria-hidden="true">Miroir</span>\
+                                </button>\
                                 <button type="button" class="btn btn-default psave" disabled>\
-                                    <span class="fa fa-1x fa-floppy-o" aria-hidden="true">&nbsp;Enregistrer</span>\
-                                </button>&nbsp;&nbsp;\
+                                    <span class="fa fa-1x fa-floppy-o" aria-hidden="true">Enregistrer</span>\
+                                </button>\
                                 <button type="button" class="btn btn-default pclose">\
-                                    <span class="fa fa-1x fa-times-circle-o" aria-hidden="true">&nbsp;Fermer</span>\
+                                    <span class="fa fa-1x fa-times-circle-o" aria-hidden="true">Fermer</span>\
                                 </button>\
                                 <div class="clearfix"></div>\
                             </div>\
@@ -87,6 +91,7 @@ $("body").on("click", ".pclose", function(){
     var file = $(this).parent().parent().find("img").attr('src');
     result = getname(file);
     localStorage.removeItem(result);
+    localStorage.removeItem('mirror_' + result);
     if(os.platform() == 'linux' || os.platform() == 'darwin'){
         file = file.replace('file://', '');
     }
@@ -110,6 +115,12 @@ $("body").on("click", ".protor180", function(){
     var div = $(this).parent().parent().find("img");
     var button= $(this).parent();
     rotation(180, div, button);
+});
+// effet miroir
+$("body").on("click", ".mirror", function(){
+    var div = $(this).parent().parent().find("img");
+    var button= $(this).parent();
+    mirror(div, button);
 });
 // Enregistrement de l'image
 $("body").on("click", ".psave", function(){
@@ -155,6 +166,7 @@ function rotation(angle, div, button)
                 //reactiver les boutons
                 OnButton(button);
                 updateLs(nomfichier, 0, button);
+                updatebutton(div, button);
             });
     }).catch(function (err) {
         console.error(err);
@@ -173,11 +185,22 @@ function getname(fichier){
 //fonction update localStorage
 function updateLs(namefile, sens, button){
     newvalue = parseFloat(localStorage.getItem(namefile)) + parseFloat(sens);
+    positionmirror = parseFloat(localStorage.getItem('mirror_' + namefile));
     if(newvalue == 4 || newvalue == -4 || newvalue == 0){
         newvalue = 0;
-        button.find('.psave').prop('disabled', true);
     }
     localStorage.setItem(namefile, newvalue);
+}
+//fonction update localStorageMiror
+function updateLsMirror(namefile) {
+    console.log(namefile);
+    positionmirror = localStorage.getItem('mirror_' + namefile);
+    console.log(positionmirror);
+    if (positionmirror == 0){
+        localStorage.setItem('mirror_' + namefile, 1);
+    }else{
+        localStorage.setItem('mirror_' + namefile , 0);
+    }
 }
 //fonction pour afficher tout les boutons
 function OnButton(button){
@@ -189,4 +212,52 @@ function OffButton(button){
     button.find('button').each(function(){
         $(this).prop('disabled', true);
     });
+}
+//fonction mirroir
+function mirror(div, button)
+{
+    var that = div;
+    fichier = that.attr('src');
+    dategenerer = new Date().getTime();
+    nomfichier = getname(fichier);
+    base = os.tmpdir() + path.sep;
+    nouveaufichiercreer = base + dategenerer + '_' + nomfichier;
+    if(os.platform() == 'linux' || os.platform() == 'darwin'){
+        fichier = fichier.replace('file://','');
+    }
+    OffButton(button);
+    updateLsMirror(nomfichier);
+    Jimp.read(fichier).then(function (file) {
+        file
+            .mirror(true,false)
+            // set rotation
+            .write(nouveaufichiercreer, function(){ //save
+                fs.unlink(fichier);
+                if(os.platform() == 'linux' || os.platform() == 'darwin'){
+                    nouveaufichiercreer = 'file://' + nouveaufichiercreer;
+                }
+                that.attr('src', nouveaufichiercreer);
+                //reactiver les boutons
+                OnButton(button);
+                updatebutton(div, button);
+            });
+    }).catch(function (err) {
+        console.error(err);
+    });
+}
+//fonction update bouton via localstorage
+function updatebutton(div, button){
+    var that = div;
+    fichier = that.attr('src');
+    dategenerer = new Date().getTime();
+    nomfichier = getname(fichier);
+    newvalue = parseFloat(localStorage.getItem(nomfichier));
+    positionmirror = parseFloat(localStorage.getItem('mirror_' + nomfichier));
+    console.log(positionmirror);
+    if(newvalue == 4 || newvalue == -4 || newvalue == 0) {
+        newvalue = 0;
+        if (positionmirror == 0) {
+            button.find('.psave').prop('disabled', true);
+        }
+    }
 }
